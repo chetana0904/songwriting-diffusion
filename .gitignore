@@ -8,3 +8,10 @@ pretrained/
 ckpt
 wandb
 *.html
+
+# Large binaries / generated data (keep repo small)
+g2p/sources/g2p_chinese_model/*.onnx
+g2p/sources/chinese_lexicon.txt
+infer/example/*.mp3
+infer/example/output/
+dataset/latent/
