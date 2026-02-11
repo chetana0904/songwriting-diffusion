@@ -124,6 +124,9 @@ sudo apt-get install espeak-ng
 sudo yum install espeak-ng
 # For MacOS
 brew install espeak-ng
+# On Apple Silicon (M1/M2/M3): use the native Homebrew so the library matches Python (arm64).
+# If you only have Intel Homebrew in /usr/local, install Apple Silicon Homebrew from https://brew.sh
+# (it installs to /opt/homebrew), then run: /opt/homebrew/bin/brew install espeak-ng
 # For Windows
 # Please visit https://github.com/espeak-ng/espeak-ng/releases to download .msi installer
 

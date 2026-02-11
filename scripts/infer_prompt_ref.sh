@@ -4,7 +4,11 @@ cd ../
 export PYTHONPATH=$PYTHONPATH:$PWD
 
 if [[ "$OSTYPE" =~ ^darwin ]]; then
-    export PHONEMIZER_ESPEAK_LIBRARY=/opt/homebrew/Cellar/espeak-ng/1.52.0/lib/libespeak-ng.dylib
+    if [[ "$(uname -m)" == "arm64" ]] && [[ -f /opt/homebrew/opt/espeak-ng/lib/libespeak-ng.dylib ]]; then
+        export PHONEMIZER_ESPEAK_LIBRARY=/opt/homebrew/opt/espeak-ng/lib/libespeak-ng.dylib
+    else
+        export PHONEMIZER_ESPEAK_LIBRARY=$(brew --prefix espeak-ng)/lib/libespeak-ng.dylib
+    fi
 fi
 
 python3 infer/infer.py \

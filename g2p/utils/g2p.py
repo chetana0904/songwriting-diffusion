@@ -3,13 +3,28 @@
 # This source code is licensed under the MIT license found in the
 # LICENSE file in the root directory of this source tree.
 
+import os
+import json
+import sys
+import platform
+from pathlib import Path
+
+# On macOS Apple Silicon, use native (arm64) espeak-ng; avoid x86_64 lib from Intel Homebrew
+if platform.system() == "Darwin" and platform.machine() == "arm64":
+    arm_lib = Path("/opt/homebrew/opt/espeak-ng/lib/libespeak-ng.dylib")
+    if arm_lib.is_file():
+        os.environ["PHONEMIZER_ESPEAK_LIBRARY"] = str(arm_lib)
+    elif "PHONEMIZER_ESPEAK_LIBRARY" not in os.environ or os.environ["PHONEMIZER_ESPEAK_LIBRARY"].startswith("/usr/local/"):
+        raise RuntimeError(
+            "On Apple Silicon (arm64), espeak-ng must be the native build. "
+            "Install Homebrew for Apple Silicon from https://brew.sh (installs to /opt/homebrew), "
+            "then run: /opt/homebrew/bin/brew install espeak-ng"
+        )
+
 from phonemizer.backend import EspeakBackend
 from phonemizer.separator import Separator
 from phonemizer.utils import list2str, str2list
 from typing import List, Union
-import os
-import json
-import sys
 
 # separator=Separator(phone=' ', word=' _ ', syllable='|'),
 separator = Separator(word=" _ ", syllable="|", phone=" ")
