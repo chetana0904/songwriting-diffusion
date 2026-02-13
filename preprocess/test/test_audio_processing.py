@@ -4,9 +4,17 @@ Tests for VAE Audio Processing Module
 Run these tests to verify the audio processing pipeline is working correctly
 before processing your full dataset.
 
-Usage:
-    python preprocess/test_audio_processing.py
+Usage (recommended - run from repo root):
+    python preprocess/test/test_audio_processing.py
 """
+
+import sys
+import os
+
+# Add preprocess directory to path for imports
+script_dir = os.path.dirname(os.path.abspath(__file__))
+preprocess_dir = os.path.dirname(script_dir)
+sys.path.insert(0, preprocess_dir)
 
 import torch
 from audio_processing import (
@@ -89,11 +97,15 @@ def test_encoding_pipeline(device: str = "cuda") -> bool:
     
     print("Testing encoding pipeline...")
     
-    # Check if test audio exists
+    # Check if test audio exists (in priority order)
+    # Now self-contained in preprocess/test/ directory
     test_audio_paths = [
-        "test_audio.wav",
-        "infer/example/test.wav",
-        "examples/test.wav"
+        "test_audio.mp3",  # When running from preprocess/test/ dir
+        "test/test_audio.mp3",  # When running from preprocess/ dir
+        "preprocess/test/test_audio.mp3",  # When running from repo root
+        # Fallback to original locations
+        "infer/example/output-windows/en-utf8-fixed.mp3",
+        "infer/example/output-windows/en-without-utf8-fix.mp3",
     ]
     
     test_audio = None
@@ -104,8 +116,10 @@ def test_encoding_pipeline(device: str = "cuda") -> bool:
     
     if test_audio is None:
         print("  ⚠ Skipping encoding test (no test audio file found)")
-        print(f"    Create one of these files to test: {test_audio_paths}")
+        print(f"    Checked these paths: {test_audio_paths[:3]}")
         return True
+    
+    print(f"  Using test audio: {test_audio}")
     
     try:
         # Load VAE
@@ -190,17 +204,28 @@ if __name__ == "__main__":
     Run tests when executing this file directly.
     
     Usage:
-        python preprocess/test_audio_processing.py
+        python preprocess/test_audio_processing.py          # Auto-detect device
+        python preprocess/test_audio_processing.py cpu      # Force CPU
+        python preprocess/test_audio_processing.py cuda     # Force CUDA (NVIDIA)
+        python preprocess/test_audio_processing.py mps      # Force MPS (Apple Silicon)
     """
     import sys
 
-    # Use CUDA if specified, fallback to MPS if available, otherwise use CPU
-    # Pass 'cuda' as argument to test on GPU
-    if len(sys.argv) > 1 and sys.argv[1] == "cuda":
-        device = "cuda"
-    elif torch.backends.mps.is_available():
-        device = "mps"
+    # Auto-detect best device or use command line argument
+    if len(sys.argv) > 1:
+        device = sys.argv[1]
+        print(f"Using device: {device}")
     else:
-        device = "cpu"
+        # Auto-detect: MPS (Apple Silicon) > CUDA (NVIDIA) > CPU
+        if torch.backends.mps.is_available():
+            device = "mps"
+            print("Auto-detected: Apple Silicon GPU (MPS)")
+        elif torch.cuda.is_available():
+            device = "cuda"
+            print("Auto-detected: NVIDIA GPU (CUDA)")
+        else:
+            device = "cpu"
+            print("Auto-detected: CPU")
+        print()
 
     run_all_tests(device=device)

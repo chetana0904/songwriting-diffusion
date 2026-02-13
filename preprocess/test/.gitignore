@@ -1,0 +1,7 @@
+# Ignore generated test outputs
+*.pt
+test_latent.*
+output/
+
+# But keep the test audio file
+!test_audio.mp3

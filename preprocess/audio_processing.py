@@ -395,8 +395,10 @@ def save_latent(latent: torch.Tensor, output_path: str) -> None:
     Reference:
         - dataset/dataset.py lines 63-64 shows how training loads latents
     """
-    # Ensure output directory exists
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    # Ensure output directory exists (only if path contains a directory)
+    output_dir = os.path.dirname(output_path)
+    if output_dir:  # Only create if there's actually a directory path
+        os.makedirs(output_dir, exist_ok=True)
     
     # Verify shape before saving
     if latent.dim() == 3:
